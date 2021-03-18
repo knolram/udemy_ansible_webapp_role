@@ -1,0 +1,36 @@
+---
+# tasks file for webapp
+    - name: install packages git wget         #loop install git et wget sur les centos uniquement
+      package:
+        name: "{{  item  }}"
+        state: present
+      when:                                     #install repo si host est un centos - sinon on passe à install python-pip et docker-python
+        ansible_distribution == "CentOS"
+      loop:
+        - epel-release
+        - git
+        - wget
+
+    - name: install python-pip                  #pre-requis install docker
+      yum:
+        name: python-pip
+        state: present
+        update_cache: yes
+
+    - name: Install docker python               #install docker
+      pip:
+        name: docker-py
+
+    - name: copy website file template
+      template:
+        src: index.html.j2                      #ansible trouvera le chemin dès qu'il verra le repertoire templates/
+        dest: /home/admin/index.html
+
+    - name: Create Apache container
+      docker_container:
+        name: webapp                            #variable indiquée dans ennoncé
+        image: httpd                            #variable indiquée dans ennoncé
+        ports:
+          - "80:80"                             #variable indiquée dans ennoncé
+        volumes:
+          - /home/admin/index.html:/usr/local/apache2/htdocs/index.html
