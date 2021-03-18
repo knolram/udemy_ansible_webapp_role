@@ -1,4 +1,3 @@
-become_password: admin
 vault_password: devops
 
 Role Name
